@@ -87,6 +87,7 @@ typedef struct node {
   Process process;
   struct node *next;
 } Node;
+//esse é o Node que será utilizado na Queue
 
 /**
  *
@@ -115,14 +116,14 @@ void insert_in_queue(Queue *q, Process p);
 
 /**
  *
- * Insere n processos aleatoriamente no fila
+ * Insere n processos aleatoriamente no fila 
  *
  */
 Queue* create_queue_of_process(int n);
 
 /**
  *
- * Imprime toda a fila de processos
+ * Imprime toda a fila de processos 
  *
  */
 void print_queue_of_process(Queue *q);
