@@ -12,8 +12,13 @@ struct HeapNode {
 class MinHeap {
 public:
 
-    explicit MinHeap(const Queue& q);
+    //explicit MinHeap(const Queue& q);
+    void build_from_queue(const Queue& q);
     MinHeap();
+
+    Process* get_process_at(int index);
+    int get_root_key() const;
+    int size() const;
 
     Process remove_min();
     void insert(const Process& p);

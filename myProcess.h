@@ -40,6 +40,10 @@ private:
 public:
     Queue();    
     ~Queue();   
+  
+    Queue(const Queue& other) = delete; 
+    Queue& operator=(const Queue& other) = delete; 
+    Queue(Queue&& other) noexcept;
 
     void insert(const Process& p);
     bool is_empty() const;

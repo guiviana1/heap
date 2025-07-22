@@ -101,3 +101,10 @@ void Queue::print() const {
         current = current->next;
     }
 }
+
+Queue::Queue(Queue&& other) noexcept
+    : start(other.start), end(other.end), current_size(other.current_size) {
+    other.start = nullptr;
+    other.end = nullptr;
+    other.current_size = 0;
+}

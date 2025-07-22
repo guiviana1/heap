@@ -4,8 +4,9 @@
 
 #include "heap.h"
 
-MinHeap::MinHeap(const Queue& q) {
-    if (is_empty()) {
+void MinHeap::build_from_queue(const Queue& q) {
+
+    if (q.is_empty()) {
         return;
     }
 
@@ -20,7 +21,6 @@ MinHeap::MinHeap(const Queue& q) {
         current = current->next;
     }
 
-    // Constrói o heap a partir do vector preenchido
     this->build_heap();
 }
 
@@ -124,4 +124,20 @@ Queue MinHeap::heap_to_queue() {
         q.insert(temp_heap.remove_min());
     }
     return q; // Retorna o objeto Queue por valor.
+}
+
+Process* MinHeap::get_process_at(int index) {
+    if (index >= 0 && index < this->nodes.size()) {
+        return &this->nodes[index].process;
+    }
+    return nullptr;
+}
+
+int MinHeap::get_root_key() const {
+    if (is_empty()) {return -1;}
+    return this->nodes.front().key;
+}
+
+int MinHeap::size() const {
+    return this->nodes.size();
 }
