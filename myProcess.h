@@ -1,133 +1,56 @@
 #ifndef MY_PROCESS_H
 #define MY_PROCESS_H
 
-#include <time.h>
-#define IDMAXREF 500
+#include <bits/stdc++.h>
+#include <string>
 
-/**
- *
- * Enum para representar programas Unix
- *
- */
+
 typedef enum {
-    VI,
-    EX,
-    AWK,
-    SED,
-    CC,
-    MAKE,
-    NROFF,
-    TROFF,
-    TBL,
-    EQN,
-    YACC,
-    LEX,
-    ADB,
-    DB,
-    CSH,
-    EMACS,
-    TIP,
-    CRON,
-    FTP,
-    TELNET,
-    PROGRAM_COUNT // usado para saber o total de programas
+    VI, EX, AWK, SED, CC, MAKE, NROFF, TROFF, TBL, EQN, YACC, LEX,
+    ADB, DB, CSH, EMACS, TIP, CRON, FTP, TELNET, PROGRAM_COUNT
 } UnixProgram;
 
-/**
- *
- * Função para obter o nome do programa como string
- *
- */
-const char* getProgramName(UnixProgram program);
+class Process {
+public:
 
-/**
- *
- * Função que pega um UnixProgram aleatoriamente
- *
- */
-UnixProgram getRandomProgram();
-
-/**
- * 
- * Estrutura para representar processos de programas Unix em execução
- *
- */
-typedef struct {
     unsigned int id;
     UnixProgram name;
     unsigned int time_to_kill;
     unsigned int time_used;
-} Process;
 
-/**
- *
- * Função que irá criar processos de forma pseudo-aleatória
- *
- */
-Process create_Process();
+    Process();
 
-/**
- *
- * Função que atualiza o valor do time_used de um process
- */
-void update_used_time(Process *p, int time);
+    void update_used_time(unsigned int time);
+    void execute_process();
+    std::string get_name() const;
+};
 
-/**
- *
- * Função que simula a execução de um processo p
- */
-void execute_Process(Process *p);
+class Queue {
+private:
 
-/**
- *
- * Estrutura para representar os node em uma fila
- *
- */
-typedef struct node {
-  Process process;
-  struct node *next;
-} Node;
-//esse é o Node que será utilizado na Queue
+    struct Node {
+        Process process;
+        Node* next;
+    };
 
-/**
- *
- * Estrutura para representar a fila
- *
- */
-typedef struct {
-  int size;
-  Node *start;
-  Node *end;
-} Queue;
+    Node* start;
+    Node* end;
+    int current_size;
 
-/**
- *
- * Inicializa uma fila vazia
- *
- */
- Queue* init_queue();
+public:
+    Queue();    
+    ~Queue();   
 
-/**
- *
- * Insere um novo processo na fila
- *
- */
-void insert_in_queue(Queue *q, Process p);
+    void insert(const Process& p);
+    bool is_empty() const;
+    int size() const;
+    void print() const; 
 
-/**
- *
- * Insere n processos aleatoriamente no fila 
- *
- */
-Queue* create_queue_of_process(int n);
+    friend class MinHeap; //boa pratica para permitir o acesso do MinHeap aos atributos aqui da classe Queue
+};
 
-/**
- *
- * Imprime toda a fila de processos 
- *
- */
-void print_queue_of_process(Queue *q);
+Queue create_random_queue(int n);
 
+std::string get_program_name(UnixProgram program);
 
-#endif
-
+#endif // MY_PROCESS_H

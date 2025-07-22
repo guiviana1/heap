@@ -4,65 +4,124 @@
 
 #include "heap.h"
 
-//troca os dois nodes, função auxiliar utilizada por heapify_up e heapify_down
-static void swap(HeapNode *a, HeapNode *b) {
-    HeapNode temp = *a;
-    *a = *b;
-    *b = temp;
+MinHeap::MinHeap(const Queue& q) {
+    if (is_empty()) {
+        return;
+    }
+
+    this->nodes.reserve(q.size());
+
+    Queue::Node* current = q.start;
+    while (current != nullptr) {
+        HeapNode newNode;
+        newNode.process = current->process;
+        newNode.key = current->process.time_to_kill - current->process.time_used;
+        this->nodes.push_back(newNode);
+        current = current->next;
+    }
+
+    // Constrói o heap a partir do vector preenchido
+    this->build_heap();
 }
 
-//troca dois nodes a depender dos valores de suas keys
-static void heapify_down(MinHeap *h, int index) {
+MinHeap::MinHeap() {}
 
+bool MinHeap::is_empty() const {
+    return this->nodes.empty();
+}
+
+void MinHeap::build_heap() {
+    for (int i = (this->nodes.size() / 2) - 1; i >= 0; i--) {
+        this->heapify_down(i);
+    }
+}
+
+
+void MinHeap::heapify_down(int index) {
     int menor = index;
     int filho_esquerdo = 2 * index + 1;
     int filho_direito = 2 * index + 2;
+    int size = this->nodes.size();
 
-    // Verifica se o filho esquerdo existe e é menor que o nó atual
-    if (filho_esquerdo < h->size && h->nodes[filho_esquerdo].key < h->nodes[menor].key) {
+    if (filho_esquerdo < size && this->nodes[filho_esquerdo].key < this->nodes[menor].key) {
         menor = filho_esquerdo;
     }
-
-    // Verifica se o filho direito existe e é menor que o menor encontrado até agora
-    if (filho_direito < h->size && h->nodes[filho_direito].key < h->nodes[menor].key) {
+    if (filho_direito < size && this->nodes[filho_direito].key < this->nodes[menor].key) {
         menor = filho_direito;
     }
 
-    // Se o menor não for o próprio nó, troca e continua o processo recursivamente
     if (menor != index) {
-        swap(&h->nodes[index], &h->nodes[menor]);
-        heapify_down(h, menor);
+        std::swap(this->nodes[index], this->nodes[menor]);
+        this->heapify_down(menor);
     }
 }
 
-
-//troca dois nodes a depender dos valores das keys
-static void heapify_up(MinHeap *h, int index) {
-
+void MinHeap::heapify_up(int index) {
+    if (index == 0) return;
     int pai = (index - 1) / 2;
 
-    // Enquanto o nó não for a raiz e for menor que seu pai, troca
-    if (index > 0 && h->nodes[index].key < h->nodes[pai].key) {
-        swap(&h->nodes[index], &h->nodes[pai]);
-        // Continua o processo para a nova posição do nó
-        heapify_up(h, pai);
+    if (this->nodes[index].key < this->nodes[pai].key) {
+        std::swap(this->nodes[index], this->nodes[pai]);
+        this->heapify_up(pai);
     }
 }
 
+void MinHeap::insert(const Process& p) {
+    HeapNode newNode;
+    newNode.process = p;
+    newNode.key = p.time_to_kill - p.time_used;
+    
+    this->nodes.push_back(newNode);
+    this->heapify_up(this->nodes.size() - 1);
+}
 
-static MinHeap* create_heap(int capacity) {
-    MinHeap *h = (MinHeap*) malloc(sizeof(MinHeap));
-    if (!h) {
-        perror("Erro ao alocar memória para o heap");
-        exit(EXIT_FAILURE);
+
+Process MinHeap::remove_min() {
+    if (this->is_empty()) {
+        throw std::runtime_error("Tentativa de remover de um heap vazio.");
     }
-    h->nodes = (HeapNode*) malloc(capacity * sizeof(HeapNode));
-    if (!h->nodes) {
-        perror("Erro ao alocar memória para os nós do heap");
-        free(h);
-        exit(EXIT_FAILURE);
+    Process min_process = this->nodes.front().process;
+    this->nodes[0] = this->nodes.back();
+    this->nodes.pop_back();
+
+    if (!this->is_empty()) {
+        this->heapify_down(0);
     }
-    h->size = 0;
-    h->capacity = capacity;
-    return h;
+    return min_process;
+}
+
+void MinHeap::update_key(unsigned int process_id, int new_time_used) {
+    int index = -1;
+    for (size_t i = 0; i < this->nodes.size(); ++i) {
+        if (this->nodes[i].process.id == process_id) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index != -1) {
+        int old_key = this->nodes[index].key;
+        this->nodes[index].process.time_used = new_time_used;
+        this->nodes[index].key = this->nodes[index].process.time_to_kill - new_time_used;
+
+        if (this->nodes[index].key < old_key) {
+            this->heapify_up(index);
+        } else {
+            this->heapify_down(index);
+        }
+    }
+}
+
+Queue MinHeap::heap_to_queue() {
+    
+    MinHeap temp_heap = *this;
+
+    // Cria um objeto Queue usando seu construtor padrão.
+    Queue q;
+
+    // Usa os métodos da classe Queue para popular a nova fila.
+    while (!temp_heap.is_empty()) {
+        q.insert(temp_heap.remove_min());
+    }
+    return q; // Retorna o objeto Queue por valor.
 }
